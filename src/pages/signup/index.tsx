@@ -6,6 +6,9 @@ import Section from '../../components/Section';
 import Spacer from '../../components/Spacer';
 import useNav from '../../lib/hooks/useNavigation';
 import { toastSuccess } from '../../lib/utils/toast';
+import { renderByShowInputs } from '../../lib/utils/render';
+
+type ShowInputType = 'email' | 'password' | 'name' | 'phone';
 
 export default function SignupPage() {
     const { navigate } = useNav();
@@ -15,10 +18,18 @@ export default function SignupPage() {
     const [phone, setPhone] = useState('');
     const filled = !!email && !!password && !!name && !!phone;
 
+    const [showInputs, setShowInputs] = useState<ShowInputType[]>(['email']);
+
     const handlePressSignup = () => {
         navigate('Login');
         toastSuccess('계정을 만들었습니다');
     };
+
+    const handleAddShowInput = (key: ShowInputType) => {
+        setShowInputs((prev) => prev.concat(key));
+    };
+
+    const r = renderByShowInputs(showInputs);
 
     return (
         <Section>
@@ -29,24 +40,53 @@ export default function SignupPage() {
                     placeholder="이메일을 입력하세요"
                     autoFocus
                     onChangeText={setEmail}
+                    onSubmitEditing={() => handleAddShowInput('password')}
                 />
-                <Spacer y={12} />
-                <Input
-                    keyboardType="ascii-capable"
-                    autoComplete="password"
-                    placeholder="비밀번호를 입력하세요"
-                    password
-                    onChangeText={setPassword}
-                />
-                <Spacer y={12} />
-                <Input autoComplete="name" placeholder="이름을 입력하세요" onChangeText={setName} />
-                <Spacer y={12} />
-                <Input
-                    autoComplete="off"
-                    keyboardType="numeric"
-                    placeholder="전화번호를 입력하세요"
-                    onChangeText={setPhone}
-                />
+
+                {r(
+                    'password',
+                    <>
+                        <Spacer y={12} />
+                        <Input
+                            keyboardType="ascii-capable"
+                            autoComplete="password"
+                            placeholder="비밀번호를 입력하세요"
+                            password
+                            onChangeText={setPassword}
+                            onSubmitEditing={() => handleAddShowInput('name')}
+                            autoFocus
+                        />
+                    </>,
+                )}
+
+                {r(
+                    'name',
+                    <>
+                        <Spacer y={12} />
+                        <Input
+                            autoComplete="name"
+                            placeholder="이름을 입력하세요"
+                            onChangeText={setName}
+                            onSubmitEditing={() => handleAddShowInput('phone')}
+                            autoFocus
+                        />
+                    </>,
+                )}
+
+                {r(
+                    'phone',
+                    <>
+                        <Spacer y={12} />
+                        <Input
+                            autoComplete="off"
+                            keyboardType="numeric"
+                            placeholder="전화번호를 입력하세요"
+                            onChangeText={setPhone}
+                            autoFocus
+                        />
+                    </>,
+                )}
+
                 <Spacer y={20} />
                 <Container row align="center">
                     <Button onPress={handlePressSignup} disabled={!filled}>

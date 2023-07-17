@@ -5,16 +5,27 @@ import Input from '../../components/Input';
 import Section from '../../components/Section';
 import Spacer from '../../components/Spacer';
 import useNav from '../../lib/hooks/useNavigation';
+import { renderByShowInputs } from '../../lib/utils/render';
+
+type ShowInputType = 'email' | 'password';
 
 export default function LoginPage() {
-    const { navigate } = useNav();
+    const { resetWithOne } = useNav();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const filled = !!email && !!password;
 
+    const [showInputs, setShowInputs] = useState<ShowInputType[]>(['email']);
+
     const handlePressLogin = () => {
-        navigate('Home');
+        resetWithOne('Home');
     };
+
+    const handleAddShowInput = (key: ShowInputType) => {
+        setShowInputs((prev) => prev.concat(key));
+    };
+
+    const r = renderByShowInputs(showInputs);
 
     return (
         <Section>
@@ -24,14 +35,24 @@ export default function LoginPage() {
                     placeholder="이메일을 입력하세요"
                     autoFocus
                     onChangeText={setEmail}
+                    onSubmitEditing={() => handleAddShowInput('password')}
                 />
-                <Spacer y={12} />
-                <Input
-                    keyboardType="ascii-capable"
-                    placeholder="비밀번호를 입력하세요"
-                    password
-                    onChangeText={setPassword}
-                />
+
+                {r(
+                    'password',
+                    <>
+                        <Spacer y={12} />
+                        <Input
+                            keyboardType="ascii-capable"
+                            placeholder="비밀번호를 입력하세요"
+                            password
+                            onChangeText={setPassword}
+                            autoFocus
+                            onSubmitEditing={handlePressLogin}
+                        />
+                    </>,
+                )}
+
                 <Spacer y={20} />
                 <Container row align="center">
                     <Button onPress={handlePressLogin} disabled={!filled}>
